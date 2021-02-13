@@ -60,8 +60,23 @@
     "type": "code"
   },
   {
+    "name": "dart",
+    "extensions": [ ".dart" ],
+    "type": "code"
+  },
+  {
     "name": "java",
     "extensions": [ ".java" ],
+    "type": "code"
+  },
+  {
+    "name": "kotlin",
+    "extensions": [ ".kts" ],
+    "type": "code"
+  },
+  {
+    "name": "scala",
+    "extensions": [ ".scala" ],
     "type": "code"
   },
   {
@@ -156,11 +171,11 @@
   },
   {
     "name": "package.json",
-    "extensions": [ ".json" ],
+    "extensions": [],
     "type": "build"
   },
   {
-    "name": "packages.config",
+    "name": "nugetpkg",
     "extensions": [ "packages.config" ],
     "type": "build"
   },
@@ -176,22 +191,22 @@
   },
   {
     "name": "pom.xml",
-    "extensions": [ "pom.xml" ],
+    "extensions": [],
     "type": "build"
   },
   {
     "name": "build.xml",
-    "extensions": [ "build.xml" ],
+    "extensions": [],
     "type": "build"
   },
   {
     "name": "build.gradle",
-    "extensions": [ "build.gradle" ],
+    "extensions": [],
     "type": "build"
   },
   {
     "name": "build.make.xml",
-    "extensions": [ "build.make.xml" ],
+    "extensions": [],
     "type": "build"
   },
   {
@@ -201,7 +216,7 @@
   },
   {
     "name": "project.clj",
-    "extensions": [ ".clj" ],
+    "extensions": [],
     "type": "build"
   },
   {
@@ -211,12 +226,32 @@
   },
   {
     "name": "build.py",
-    "extensions": [ "build.py" ],
+    "extensions": [],
     "type": "build"
+  },
+  {
+    "name": "typescript-config",
+    "extensions": [ "tsconfig.json", "typings.json" ],
+    "type": "build"
+  },
+  {
+    "name": "json",
+    "extensions": [ ".json" ],
+    "type": "build"
+  },
+  {
+    "name": "terraform",
+    "extensions": [ ".tf" ],
+    "type": "code"
   },
   {
     "name": ".config",
     "extensions": [ ".config" ],
     "type": "build"
+  },
+  {
+    "name": "Package.appxmanifest",
+    "extensions": [ ".appxmanifest" ],
+    "type": "code"
   }
 ]

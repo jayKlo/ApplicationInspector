@@ -64,11 +64,19 @@
           "code",
           "comment"
         ],
-        "modifiers": [ "i" ],
         "confidence": "high"
       },
       {
-        "pattern": "active-?x|CreateObject",
+        "pattern": "Type\\.GetTypeFromProgID",
+        "type": "regex",
+        "scopes": [
+          "code",
+          "comment"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "pattern": "active-?x",
         "type": "regex",
         "scopes": [
           "code",
@@ -81,10 +89,34 @@
   },
   {
     "name": "Component: Active-X",
+    "id": "AI005001",
+    "description": "Component: Active-X",
+    "applies_to": [
+      "vb"
+    ],
+    "tags": [
+      "Component.Executable.Microsoft.ActiveX"
+    ],
+    "severity": "moderate",
+    "patterns": [
+      {
+        "pattern": "= CreateObject\\(",
+        "type": "regex",
+        "scopes": [
+          "code",
+          "comment"
+        ],
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "name": "Component: Active-X",
     "id": "AI005010",
     "description": "Component: Active-X",
     "applies_to": [
-      "javascript", "typescript"
+      "javascript",
+      "typescript"
     ],
     "tags": [
       "Component.Executable.Microsoft.ActiveX"
@@ -97,7 +129,6 @@
         "scopes": [
           "code"
         ],
-        "modifiers": [ "i" ],
         "confidence": "high"
       }
     ]

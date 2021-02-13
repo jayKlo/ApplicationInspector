@@ -3,23 +3,24 @@
 
 using Newtonsoft.Json;
 
-namespace RulesEngine
+namespace Microsoft.ApplicationInspector.RulesEngine
 {
     /// <summary>
     /// Content Type class
     /// </summary>
     public class LanguageInfo
     {
-        public enum LangFileType { Code, Build, Other };
+        public enum LangFileType { Code, Build };
 
         [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         [JsonProperty(PropertyName = "extensions")]
-        public string[] Extensions { get; set; }
+        public string[]? Extensions { get; set; }
+
         [JsonProperty(PropertyName = "type")]
-        public LangFileType Type { get; set; }
+        public LangFileType Type { get; set; } = LangFileType.Code;
     }
 
-
+   
 }

@@ -4,7 +4,6 @@
     "id": "AI040200",
     "description": "Authorization: Microsoft Azure SAS",
     "applies_to": [
-      "common_source_code"
     ],
     "tags": [
       "Authorization.Microsoft.Azuze.SAS"
@@ -17,7 +16,6 @@
         "scopes": [
           "code"
         ],
-        "modifiers": [ "i" ],
         "confidence": "high"
       },
       {
@@ -36,7 +34,6 @@
     "id": "AI040300",
     "description": "Authorization: Roles Based Access (RBAC)",
     "applies_to": [
-      "common_source_code"
     ],
     "tags": [
       "Authorization.RBAC"
@@ -59,7 +56,6 @@
     "id": "AI040400",
     "description": "Authorization: Permissions",
     "applies_to": [
-      "common_source_code"
     ],
     "tags": [
       "Authorization.Permissions"
@@ -98,7 +94,6 @@
     "id": "AI040500",
     "description": "Authorization: Claims",
     "applies_to": [
-      "common_source_code"
     ],
     "tags": [
       "Authorization.Claims"
@@ -137,7 +132,6 @@
     "id": "AI040600",
     "description": "Authorization: General",
     "applies_to": [
-      "common_source_code"
     ],
     "tags": [
       "Authorization.General"

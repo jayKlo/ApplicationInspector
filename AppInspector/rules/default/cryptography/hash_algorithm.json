@@ -70,7 +70,7 @@
     "severity": "moderate",
     "patterns": [
       {
-        "pattern": "RIPEMD|Blowfish|Twofish|Threefish|Serpent|HMAC|KeyedHashAlgorithm",
+        "pattern": "RIPEMD|Blowfish|Twofish|Threefish|Serpent|HMAC|KeyedHashAlgorithm|Blake2|Blake3",
         "type": "regex",
         "scopes": [
           "code",
@@ -119,6 +119,22 @@
         ],
         "modifiers": [ "i" ],
         "confidence": "medium"
+      }
+    ],
+    "conditions": [
+      {
+        "pattern": {
+          "pattern": "(NS)*Hashset|Hashtable|Hashmap",
+          "type": "regex-word",
+          "scopes": [
+            "code"
+          ],
+          "modifiers": [ "i" ],
+          "_comment": "varies by language e.g. HashTable"
+        },
+        "search_in": "finding-only",
+        "negate_finding": true,
+        "_comment": "means not directly related to crypto"
       }
     ]
   }

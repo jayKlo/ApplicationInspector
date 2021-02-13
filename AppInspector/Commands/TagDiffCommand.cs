@@ -2,205 +2,274 @@
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
 using Newtonsoft.Json;
+using NLog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 
-
-namespace Microsoft.AppInspector
+namespace Microsoft.ApplicationInspector.Commands
 {
-    [Serializable]
-    public class TagsFile
+    public class TagDiffOptions : CommandOptions
     {
-        [JsonProperty(PropertyName = "tags")]
-        public string[] Tags { get; set; }
+        public string SourcePath1 { get; set; } = "";
+        public string SourcePath2 { get; set; } = "";
+        public string TestType { get; set; } = "equality";
+        public string FilePathExclusions { get; set; } = "sample,example,test,docs,.vs,.git";
+        public string? CustomRulesPath { get; set; }
+        public bool IgnoreDefaultRules { get; set; }
+    }
+
+    /// <summary>
+    /// Contains a tag that was detected missing in source1 or source2
+    /// </summary>
+    public class TagDiff
+    {
+        public enum DiffSource
+        {
+            Source1 = 1,
+            Source2 = 2
+        }
+
+        /// <summary>
+        /// Tag value from rule used in comparison
+        /// </summary>
+        [JsonProperty(PropertyName = "tag")]
+        public string? Tag { get; set; }
+
+        /// <summary>
+        /// Source file (src1/src2) from the command option arguments
+        /// </summary>
+        [JsonProperty(PropertyName = "source")]
+        public DiffSource Source { get; set; }
+    }
+
+    /// <summary>
+    /// Result wrapping list of tags not found in one of the sources scanned
+    /// </summary>
+    public class TagDiffResult : Result
+    {
+        public enum ExitCode
+        {
+            TestPassed = 0,
+            TestFailed = 1,
+            CriticalError = Utils.ExitCode.CriticalError //ensure common value for final exit log mention
+        }
+
+        [JsonProperty(Order = 2, PropertyName = "resultCode")]
+        public ExitCode ResultCode { get; set; }
+
+        /// <summary>
+        /// List of tags which differ between src1 and src2
+        /// </summary>
+        [JsonProperty(Order = 3, PropertyName = "tagDiffList")]
+        public List<TagDiff> TagDiffList;
+
+        public TagDiffResult()
+        {
+            TagDiffList = new List<TagDiff>();
+        }
     }
 
     /// <summary>
     /// Used to compare two source paths and report tag differences
     /// </summary>
-    public class TagDiffCommand : ICommand
-   {
-        private string _arg_src1, _arg_src2;
-        private string _arg_rulesPath;
-        private string _arg_outputFile;
-        private bool _arg_ignoreDefault;
+    public class TagDiffCommand
+    {
+        private enum TagTestType { Equality, Inequality }
+
+        private readonly TagDiffOptions? _options;
         private TagTestType _arg_tagTestType;
-        private WriteOnce.ConsoleVerbosity _arg_consoleVerbosityLevel;
 
-        public enum ExitCode
+        public TagDiffCommand(TagDiffOptions opt)
         {
-            TestPassed = 0,
-            TestFailed = 1,
-            CriticalError = 2
-        }
-
-        enum TagTestType { Equality, Inequality }
-
-        public TagDiffCommand(TagDiffCommandOptions opt)
-        {
-            _arg_src1 = opt.SourcePath1;
-            _arg_src2 = opt.SourcePath2;
-            _arg_rulesPath = opt.CustomRulesPath;
-            _arg_outputFile = opt.OutputFilePath;
-            if (!Enum.TryParse(opt.ConsoleVerbosityLevel, true, out _arg_consoleVerbosityLevel))
-                throw new OpException(String.Format(ErrMsg.FormatString(ErrMsg.ID.CMD_INVALID_ARG_VALUE, "-x")));
-            WriteOnce.Verbosity = _arg_consoleVerbosityLevel;
-
-            if (!Enum.TryParse(opt.TestType, true, out _arg_tagTestType))
-                throw new OpException(ErrMsg.FormatString(ErrMsg.ID.CMD_INVALID_ARG_VALUE, opt.TestType));
-
-            _arg_ignoreDefault = opt.IgnoreDefaultRules;
-
-        }
-
-        public int Run()
-        {
-            WriteOnce.Operation(ErrMsg.FormatString(ErrMsg.ID.CMD_RUNNING, "Tagdiff"));
-            
-            //setup output                       
-            TextWriter outputWriter;
-            if (!string.IsNullOrEmpty(_arg_outputFile))
-            {
-                outputWriter = File.CreateText(_arg_outputFile);
-                outputWriter.WriteLine(Program.GetVersionString());
-                WriteOnce.Writer = outputWriter;
-            }
-
-            if (_arg_src1 == _arg_src2)
-            {
-                throw new OpException(ErrMsg.GetString(ErrMsg.ID.TAGDIFF_SAME_FILE_ARG));
-            }
-            else if (string.IsNullOrEmpty(_arg_src1) || string.IsNullOrEmpty(_arg_src2))
-            {
-                throw new OpException(ErrMsg.GetString(ErrMsg.ID.CMD_INVALID_ARG_VALUE));
-            }
-
-            #region setup analyze calls
-
-            //save to quiet analyze cmd
-            WriteOnce.ConsoleVerbosity saveVerbosity = WriteOnce.Verbosity;
-
-            string tmp1 = Path.GetTempFileName();
-            string tmp2 = Path.GetTempFileName();
-
-            AnalyzeCommand.ExitCode result1 = AnalyzeCommand.ExitCode.CriticalError;
-            AnalyzeCommand.ExitCode result2 = AnalyzeCommand.ExitCode.CriticalError;
+            _options = opt;
+            _options.TestType ??= "equality";
 
             try
             {
-                AnalyzeCommand cmd1 = new AnalyzeCommand(new AnalyzeCommandOptions
-                {
-                    SourcePath = _arg_src1,
-                    OutputFilePath = tmp1,
-                    OutputFileFormat = "json",
-                    CustomRulesPath = _arg_rulesPath,
-                    IgnoreDefaultRules = _arg_ignoreDefault,
-                    SimpleTagsOnly = true,
-                    AllowDupTags = false,
-                    ConsoleVerbosityLevel = "None"
-                });
-                AnalyzeCommand cmd2 = new AnalyzeCommand(new AnalyzeCommandOptions
-                {
-                    SourcePath = _arg_src2,
-                    OutputFilePath = tmp2,
-                    OutputFileFormat = "json",
-                    CustomRulesPath = _arg_rulesPath,
-                    IgnoreDefaultRules = _arg_ignoreDefault,
-                    SimpleTagsOnly = true,
-                    AllowDupTags = false,
-                    ConsoleVerbosityLevel = "None"
-                });
+                _options.Log ??= Utils.SetupLogging(_options);
+                WriteOnce.Log ??= _options.Log;
 
-
-                result1 = (AnalyzeCommand.ExitCode)cmd1.Run();
-                result2 = (AnalyzeCommand.ExitCode)cmd2.Run();
+                ConfigureConsoleOutput();
+                ConfigureCompareType();
+                ConfigSourceToScan();
             }
-            catch (Exception e)
+            catch (OpException e) //group error handling
             {
-                //restore
-                WriteOnce.Verbosity = saveVerbosity;
-                throw e;
+                WriteOnce.Error(e.Message);
+                throw;
             }
-
-            //restore
-            WriteOnce.Verbosity = saveVerbosity;
-
-            #endregion
-
-            bool successResult;
-            bool equal1 = true;
-            bool equal2 = true;
-
-            //process results for each analyze call before comparing results
-            if (result1 == AnalyzeCommand.ExitCode.CriticalError)
-            {
-                throw new OpException(ErrMsg.FormatString(ErrMsg.ID.CMD_CRITICAL_FILE_ERR, _arg_src1));
-            }
-            else if (result2 == AnalyzeCommand.ExitCode.CriticalError)
-            {
-                throw new OpException(ErrMsg.FormatString(ErrMsg.ID.CMD_CRITICAL_FILE_ERR, _arg_src2));
-            }
-            else if (result1 == AnalyzeCommand.ExitCode.NoMatches || result2 == AnalyzeCommand.ExitCode.NoMatches)
-            {
-                throw new OpException(ErrMsg.GetString(ErrMsg.ID.TAGDIFF_NO_TAGS_FOUND));
-            }
-            else //compare tag results; assumed (result1&2 == AnalyzeCommand.ExitCode.MatchesFound)
-            {
-                string file1TagsJson = File.ReadAllText(tmp1);
-                string file2TagsJson = File.ReadAllText(tmp2);
-
-                //fix #97 adjust for app version in structure change
-                file1TagsJson = file1TagsJson.Substring(file1TagsJson.IndexOf("["));
-                file2TagsJson = file2TagsJson.Substring(file2TagsJson.IndexOf("["));
-
-                var file1Tags = JsonConvert.DeserializeObject<TagsFile[]>(file1TagsJson).First();
-                var file2Tags = JsonConvert.DeserializeObject<TagsFile[]>(file2TagsJson).First();
-
-                //can't simply compare counts as content may differ; must compare both in directions in two passes a->b; b->a
-                //first pass
-                WriteOnce.General(ErrMsg.FormatString(ErrMsg.ID.TAGDIFF_RESULTS_GAP, Path.GetFileName(_arg_src1), Path.GetFileName(_arg_src2)),
-                        true, WriteOnce.ConsoleVerbosity.High);
-                equal1 = CompareTags(file1Tags.Tags, file2Tags.Tags);
-
-                //reverse order for second pass
-                WriteOnce.General(ErrMsg.FormatString(ErrMsg.ID.TAGDIFF_RESULTS_GAP, Path.GetFileName(_arg_src2), Path.GetFileName(_arg_src1)),
-                        true, WriteOnce.ConsoleVerbosity.High);
-                equal2 = CompareTags(file2Tags.Tags, file1Tags.Tags);
-
-                //final results
-                bool resultsDiffer = !(equal1 && equal2);
-                if (_arg_tagTestType == TagTestType.Inequality && resultsDiffer)
-                    successResult = true;
-                else if (_arg_tagTestType == TagTestType.Equality && !resultsDiffer)
-                    successResult = true;
-                else
-                    successResult = false;
-
-                WriteOnce.General(ErrMsg.GetString(ErrMsg.ID.TAGDIFF_RESULTS_DIFFER), false);
-                WriteOnce.Result(resultsDiffer.ToString());
-            }
-
-            //cleanup
-            try 
-            {
-                File.Delete(tmp1);
-                File.Delete(tmp2);
-            }
-            catch
-            {
-                //no action needed; 
-            }
-
-            WriteOnce.FlushAll();
-            WriteOnce.Operation(ErrMsg.FormatString(ErrMsg.ID.CMD_COMPLETED, "Tagdiff"));
-
-            return successResult ? (int)ExitCode.TestPassed : (int)ExitCode.TestFailed;
         }
 
+        #region config
 
+        /// <summary>
+        /// Establish console verbosity
+        /// For NuGet DLL use, console is muted overriding any arguments sent
+        /// Pre: Always call again after ConfigureFileOutput
+        /// </summary>
+        private void ConfigureConsoleOutput()
+        {
+            WriteOnce.SafeLog("TagDiffCommand::ConfigureConsoleOutput", LogLevel.Trace);
 
-        bool CompareTags(string[] fileTags1, string[] fileTags2)
+            //Set console verbosity based on run context (none for DLL use) and caller arguments
+            if (!Utils.CLIExecutionContext)
+            {
+                WriteOnce.Verbosity = WriteOnce.ConsoleVerbosity.None;
+            }
+            else
+            {
+                WriteOnce.ConsoleVerbosity verbosity = WriteOnce.ConsoleVerbosity.Medium;
+                if (!Enum.TryParse(_options?.ConsoleVerbosityLevel, true, out verbosity))
+                {
+                    throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_INVALID_ARG_VALUE, "-x"));
+                }
+                else
+                {
+                    WriteOnce.Verbosity = verbosity;
+                }
+            }
+        }
+
+        private void ConfigureCompareType()
+        {
+            if (!Enum.TryParse(_options?.TestType, true, out _arg_tagTestType))
+            {
+                throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_INVALID_ARG_VALUE, _options?.TestType ?? ""));
+            }
+        }
+
+        private void ConfigSourceToScan()
+        {
+            WriteOnce.SafeLog("TagDiff::ConfigRules", LogLevel.Trace);
+
+            if (_options?.SourcePath1 == _options?.SourcePath2)
+            {
+                throw new OpException(MsgHelp.GetString(MsgHelp.ID.TAGDIFF_SAME_FILE_ARG));
+            }
+            else if (string.IsNullOrEmpty(_options?.SourcePath1) || string.IsNullOrEmpty(_options?.SourcePath2))
+            {
+                throw new OpException(MsgHelp.GetString(MsgHelp.ID.CMD_INVALID_ARG_VALUE));
+            }
+        }
+
+        #endregion config
+
+        /// <summary>
+        /// Main entry from CLI
+        /// </summary>
+        /// <returns></returns>
+        public TagDiffResult GetResult()
+        {
+            WriteOnce.SafeLog("TagDiffCommand::Run", LogLevel.Trace);
+            WriteOnce.Operation(MsgHelp.FormatString(MsgHelp.ID.CMD_RUNNING, "Tag Diff"));
+
+            TagDiffResult tagDiffResult = new TagDiffResult() { AppVersion = Utils.GetVersionString() };
+
+            //save to quiet analyze cmd and restore
+            WriteOnce.ConsoleVerbosity saveVerbosity = WriteOnce.Verbosity;
+
+            try
+            {
+                #region setup analyze calls
+
+                AnalyzeCommand cmd1 = new AnalyzeCommand(new AnalyzeOptions
+                {
+                    SourcePath = _options?.SourcePath1 ?? "",
+                    CustomRulesPath = _options?.CustomRulesPath,
+                    IgnoreDefaultRules = _options?.IgnoreDefaultRules ?? false,
+                    FilePathExclusions = _options?.FilePathExclusions ?? "",
+                    ConsoleVerbosityLevel = "none",
+                    Log = _options?.Log
+                });
+                AnalyzeCommand cmd2 = new AnalyzeCommand(new AnalyzeOptions
+                {
+                    SourcePath = _options?.SourcePath2 ?? "",
+                    CustomRulesPath = _options?.CustomRulesPath,
+                    IgnoreDefaultRules = _options != null ? _options.IgnoreDefaultRules : false,
+                    FilePathExclusions = _options?.FilePathExclusions ?? "",
+                    ConsoleVerbosityLevel = "none",
+                    Log = _options?.Log
+                });
+
+                AnalyzeResult analyze1 = cmd1.GetResult();
+                AnalyzeResult analyze2 = cmd2.GetResult();
+
+                //restore
+                WriteOnce.Verbosity = saveVerbosity;
+
+                #endregion setup analyze calls
+
+                bool equalTagsCompare1;
+                bool equalTagsCompare2;
+
+                //process results for each analyze call before comparing results
+                if (analyze1.ResultCode == AnalyzeResult.ExitCode.CriticalError)
+                {
+                    throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_CRITICAL_FILE_ERR, _options?.SourcePath1 ?? ""));
+                }
+                else if (analyze2.ResultCode == AnalyzeResult.ExitCode.CriticalError)
+                {
+                    throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_CRITICAL_FILE_ERR, _options?.SourcePath2 ?? ""));
+                }
+                else if (analyze1.ResultCode == AnalyzeResult.ExitCode.NoMatches || analyze2.ResultCode == AnalyzeResult.ExitCode.NoMatches)
+                {
+                    throw new OpException(MsgHelp.GetString(MsgHelp.ID.TAGDIFF_NO_TAGS_FOUND));
+                }
+                else //compare tag results; assumed (result1&2 == AnalyzeCommand.ExitCode.Success)
+                {
+                    int count1 = 0;
+                    int sizeTags1 = analyze1.Metadata.UniqueTags != null ? analyze1.Metadata.UniqueTags.Count : 0;
+                    string[] file1Tags = new string[sizeTags1];
+
+                    foreach (string tag in analyze1.Metadata.UniqueTags ?? new List<string>())
+                    {
+                        file1Tags[count1++] = tag;
+                    }
+
+                    int count2 = 0;
+                    int sizeTags2 = analyze2.Metadata.UniqueTags != null ? analyze2.Metadata.UniqueTags.Count : 0;
+                    string[] file2Tags = new string[sizeTags2];
+
+                    foreach (string tag in analyze2.Metadata.UniqueTags ?? new List<string>())
+                    {
+                        file2Tags[count2++] = tag;
+                    }
+
+                    //can't simply compare counts as content may differ; must compare both in directions in two passes a->b; b->a
+                    equalTagsCompare1 = CompareTags(file1Tags, file2Tags, ref tagDiffResult, TagDiff.DiffSource.Source1);
+
+                    //reverse order for second pass
+                    equalTagsCompare2 = CompareTags(file2Tags, file1Tags, ref tagDiffResult, TagDiff.DiffSource.Source2);
+
+                    //final results
+                    bool resultsDiffer = !(equalTagsCompare1 && equalTagsCompare2);
+                    if (_arg_tagTestType == TagTestType.Inequality && !resultsDiffer)
+                    {
+                        tagDiffResult.ResultCode = TagDiffResult.ExitCode.TestFailed;
+                    }
+                    else if (_arg_tagTestType == TagTestType.Equality && resultsDiffer)
+                    {
+                        tagDiffResult.ResultCode = TagDiffResult.ExitCode.TestFailed;
+                    }
+                    else
+                    {
+                        tagDiffResult.ResultCode = TagDiffResult.ExitCode.TestPassed;
+                    }
+                }
+            }
+            catch (OpException e)
+            {
+                WriteOnce.Verbosity = saveVerbosity;
+                WriteOnce.Error(e.Message);
+                //caught for CLI callers with final exit msg about checking log or throws for DLL callers
+                throw;
+            }
+
+            return tagDiffResult;
+        }
+
+        private bool CompareTags(string[] fileTags1, string[] fileTags2, ref TagDiffResult tagDiffResult, TagDiff.DiffSource source)
         {
             bool found = true;
             //are all tags in file1 found in file2
@@ -209,17 +278,11 @@ namespace Microsoft.AppInspector
                 if (!fileTags2.Contains(s1))
                 {
                     found = false;
-                    WriteOnce.Result(s1, true, WriteOnce.ConsoleVerbosity.High);
+                    tagDiffResult.TagDiffList.Add(new TagDiff() { Tag = s1, Source = source });
                 }
             }
 
-            //none missing
-            if (found)
-                WriteOnce.Result(ErrMsg.GetString(ErrMsg.ID.TAGTEST_RESULTS_NONE), true, WriteOnce.ConsoleVerbosity.High);
-
             return found;
         }
-
-
     }
 }

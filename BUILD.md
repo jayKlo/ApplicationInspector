@@ -3,10 +3,10 @@
 ## Pre-requisites
 
 ### .NET Core:
-- .NET Core 3.0 or better (https://dotnet.microsoft.com/download/dotnet-core/3.0)
+- .NET Core 3.1 or better (https://dotnet.microsoft.com/download/dotnet-core/3.1)
 - Download the application code as a zip and expand or clone in Visual Studio 2019 and simply build in IDE
 
-## Commandline Building
+## Commandline 
 
 Run these commands in the ```ApplicationInspector``` directory.
 
@@ -19,17 +19,22 @@ dotnet build
 
 Linux/Mac
 ```
-make
+dotnet build
 ```
 
 ### Building a Release version
 
-Windows
+#### Platform Targeted Portable
 ```
 dotnet publish -c Release -r win10-x64
+dotnet publish -c Release -r win-x86
+dotnet publish -c Release -r linux-x64
+dotnet publish -c Release -r osx-x64
 ```
 
-Linux/Mac
+#### Framework Dependent
 ```
-make release
+  dotnet build -c Release
 ```
+
+ 

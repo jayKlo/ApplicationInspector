@@ -4,8 +4,7 @@
     "id": "AI041800",
     "description": "Testing Framework: Ava",
     "applies_to": [
-      "package.json",
-      "yarn.lock"
+      "package.json"
     ],
     "tags": [
       "Framework.Testing.Ava"
@@ -51,9 +50,9 @@
     ]
   },
   {
-    "name": "Testing Framework: ",
+    "name": "Testing Framework: JSUnit",
     "id": "AI042000",
-    "description": "Testing Framework: ",
+    "description": "Testing Framework: JSUnit",
     "applies_to": [
       "javascript"
     ],

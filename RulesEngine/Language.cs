@@ -1,5 +1,4 @@
-﻿// Copyright(C) Microsoft.All rights reserved.
-// Licensed under the MIT License. See LICENSE.txt in the project root for license information.
+﻿// Copyright (C) Microsoft. All rights reserved. Licensed under the MIT License.
 
 using Newtonsoft.Json;
 using System;
@@ -8,32 +7,36 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
-namespace RulesEngine
+namespace Microsoft.ApplicationInspector.RulesEngine
 {
     /// <summary>
     /// Helper class for language based commenting
     /// </summary>
     public class Language
     {
+        private static Language? _instance;
+        private List<Comment> Comments;
+        private List<LanguageInfo> Languages;
+
         private Language()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             // Load comments
-            Stream resource = assembly.GetManifestResourceStream("RulesEngine.Resources.comments.json");
-            using (StreamReader file = new StreamReader(resource))
+            Stream? resource = assembly.GetManifestResourceStream("Microsoft.ApplicationInspector.RulesEngine.Resources.comments.json");
+            using (StreamReader file = new StreamReader(resource ?? new MemoryStream()))
             {
                 Comments = JsonConvert.DeserializeObject<List<Comment>>(file.ReadToEnd());
             }
 
             // Load languages
-            resource = assembly.GetManifestResourceStream("RulesEngine.Resources.languages.json");
-            using (StreamReader file = new StreamReader(resource))
+            resource = assembly.GetManifestResourceStream("Microsoft.ApplicationInspector.RulesEngine.Resources.languages.json");
+            using (StreamReader file = new StreamReader(resource ?? new MemoryStream()))
             {
                 Languages = JsonConvert.DeserializeObject<List<LanguageInfo>>(file.ReadToEnd());
             }
         }
-
         /// <summary>
         /// Returns language for given file name
         /// </summary>
@@ -42,9 +45,9 @@ namespace RulesEngine
         public static bool FromFileName(string fileName, ref LanguageInfo info)
         {
             if (fileName == null)
+            {
                 return false;
-
-            bool result = false;
+            }
 
             string file = Path.GetFileName(fileName).ToLower(CultureInfo.CurrentCulture);
             string ext = Path.GetExtension(file);
@@ -55,8 +58,7 @@ namespace RulesEngine
                 if (item.Name == file)
                 {
                     info = item;
-                    result = true;
-                    break;
+                    return true;
                 }
             }
 
@@ -65,21 +67,28 @@ namespace RulesEngine
             {
                 foreach (LanguageInfo item in Instance.Languages)
                 {
-                    if (Array.Exists(item.Extensions, x => x.EndsWith(ext)))
+                    if (item.Name == "typescript-config")//special case where extension used for exact match to a single type
+                    {
+                        if (item.Extensions.Any(x => x.ToLower().Equals(file)))
+                        {
+                            info = item;
+                            return true;
+                        }
+                    }
+                    else if (Array.Exists(item.Extensions ?? Array.Empty<string>(), x => x.EndsWith(ext, StringComparison.InvariantCultureIgnoreCase)))
                     {
                         info = item;
-                        result = true;
-                        break;
+                        return true;
                     }
                 }
             }
 
-            return result;
+            return false;
         }
 
         /// <summary>
         /// Gets comment inline for given language
-        /// </summary>        
+        /// </summary>
         /// <param name="language">Language</param>
         /// <returns>Commented string</returns>
         public static string GetCommentInline(string language)
@@ -90,7 +99,7 @@ namespace RulesEngine
             {
                 foreach (Comment comment in Instance.Comments)
                 {
-                    if (comment.Languages.Contains(language))
+                    if (Array.Exists(comment.Languages ?? new string[] { "" }, x => x.Equals(language, StringComparison.InvariantCultureIgnoreCase)) && comment.Inline is { })
                         return comment.Inline;
                 }
             }
@@ -100,7 +109,7 @@ namespace RulesEngine
 
         /// <summary>
         /// Gets comment preffix for given language
-        /// </summary>        
+        /// </summary>
         /// <param name="language">Language</param>
         /// <returns>Commented string</returns>
         public static string GetCommentPrefix(string language)
@@ -111,8 +120,8 @@ namespace RulesEngine
             {
                 foreach (Comment comment in Instance.Comments)
                 {
-                    if (comment.Languages.Contains(language))
-                        return comment.Preffix;
+                    if (comment.Languages.Contains(language.ToLower(CultureInfo.InvariantCulture)) && comment.Prefix is { })
+                        return comment.Prefix;
                 }
             }
 
@@ -121,7 +130,7 @@ namespace RulesEngine
 
         /// <summary>
         /// Gets comment suffix for given language
-        /// </summary>        
+        /// </summary>
         /// <param name="language">Language</param>
         /// <returns>Commented string</returns>
         public static string GetCommentSuffix(string language)
@@ -132,7 +141,7 @@ namespace RulesEngine
             {
                 foreach (Comment comment in Instance.Comments)
                 {
-                    if (comment.Languages.Contains(language))
+                    if (Array.Exists(comment.Languages ?? new string[] { "" }, x => x.Equals(language, StringComparison.InvariantCultureIgnoreCase)) && comment.Suffix is { })
                         return comment.Suffix;
                 }
             }
@@ -141,7 +150,7 @@ namespace RulesEngine
         }
 
         /// <summary>
-        /// Get names of all known lannguages
+        /// Get names of all known languages
         /// </summary>
         /// <returns>Returns list of names</returns>
         public static string[] GetNames()
@@ -151,21 +160,17 @@ namespace RulesEngine
 
             return names.ToArray();
         }
-
-        private static Language _instance;
         private static Language Instance
         {
             get
             {
                 if (_instance == null)
+                {
                     _instance = new Language();
+                }
 
                 return _instance;
-            }        
+            }
         }
-
-        private List<Comment> Comments;
-        private List<LanguageInfo> Languages;      
     }
 }
-

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ApplicationInspector.Properties {
+namespace Microsoft.ApplicationInspector.Commands.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ApplicationInspector.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ApplicationInspector.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.ApplicationInspector.Commands.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,7 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Problem while decompressing {0}: Unzip and try running on uncompressed files..
+        ///   Looks up a localized string similar to Problem while decompressing {0}: Unzip and try running on uncompressed files.
         /// </summary>
         internal static string ANALYZE_COMPRESSED_ERROR {
             get {
@@ -97,6 +97,24 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File skipped: Name or path in exclude list. {0}.
+        /// </summary>
+        internal static string ANALYZE_EXCLUDED_TYPE_SKIPPED {
+            get {
+                return ResourceManager.GetString("ANALYZE_EXCLUDED_TYPE_SKIPPED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine file type.  File open error for {0}.
+        /// </summary>
+        internal static string ANALYZE_FILE_TYPE_OPEN {
+            get {
+                return ResourceManager.GetString("ANALYZE_FILE_TYPE_OPEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}% source files processed.
         /// </summary>
         internal static string ANALYZE_FILES_PROCESSED_PCNT {
@@ -106,11 +124,38 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File {0} is too large.  File skipped..
+        ///   Looks up a localized string similar to File skipped: File size is too large.  {0}.
         /// </summary>
         internal static string ANALYZE_FILESIZE_SKIPPED {
             get {
                 return ResourceManager.GetString("ANALYZE_FILESIZE_SKIPPED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The output file does not have an html or htm extension and may not open properly in your browser.
+        /// </summary>
+        internal static string ANALYZE_HTML_EXTENSION {
+            get {
+                return ResourceManager.GetString("ANALYZE_HTML_EXTENSION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File skipped: Language not found for file {0}.
+        /// </summary>
+        internal static string ANALYZE_LANGUAGE_NOTFOUND {
+            get {
+                return ResourceManager.GetString("ANALYZE_LANGUAGE_NOTFOUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow duplicate matches argument not supported for html output format.  Select a different output format (text/json) or remove the argument..
+        /// </summary>
+        internal static string ANALYZE_NODUPLICATES_HTML_FORMAT {
+            get {
+                return ResourceManager.GetString("ANALYZE_NODUPLICATES_HTML_FORMAT", resourceCulture);
             }
         }
         
@@ -133,20 +178,20 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to See output file {0}.
-        /// </summary>
-        internal static string ANALYZE_OUTPUT_FILE {
-            get {
-                return ResourceManager.GetString("ANALYZE_OUTPUT_FILE", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The output.html file size is large and may render slowly.  Consider running using alternate output format options as needed..
         /// </summary>
         internal static string ANALYZE_REPORTSIZE_WARN {
             get {
                 return ResourceManager.GetString("ANALYZE_REPORTSIZE_WARN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Simple tags only argument not supported for html output format.  Select a different output format or remove the argument.
+        /// </summary>
+        internal static string ANALYZE_SIMPLETAGS_HTML_FORMAT {
+            get {
+                return ResourceManager.GetString("ANALYZE_SIMPLETAGS_HTML_FORMAT", resourceCulture);
             }
         }
         
@@ -178,7 +223,7 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to launch output.html in default browser.  Launch your browser manually to view output.html report file..
+        ///   Looks up a localized string similar to Unable to launch output.html in default browser.  Launch your browser manually to view output.html report file.
         /// </summary>
         internal static string BROWSER_START_FAIL {
             get {
@@ -232,6 +277,15 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The requested log file {0}) exist but is not recognized as an application log. Provide a different value or delete the file and try again..
+        /// </summary>
+        internal static string CMD_INVALID_LOG_PATH {
+            get {
+                return ResourceManager.GetString("CMD_INVALID_LOG_PATH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid rule path {0}.
         /// </summary>
         internal static string CMD_INVALID_RULE_PATH {
@@ -241,7 +295,16 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No rules specified.  At least one valid rules path required..
+        ///   Looks up a localized string similar to No output specified.  Raise the console versosity or provide an output file argument..
+        /// </summary>
+        internal static string CMD_NO_OUTPUT {
+            get {
+                return ResourceManager.GetString("CMD_NO_OUTPUT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No rules specified.  At least one valid rules path required.
         /// </summary>
         internal static string CMD_NORULES_SPECIFIED {
             get {
@@ -255,6 +318,15 @@ namespace ApplicationInspector.Properties {
         internal static string CMD_PREPARING_REPORT {
             get {
                 return ResourceManager.GetString("CMD_PREPARING_REPORT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Additional details may be found in log file at {0}.
+        /// </summary>
+        internal static string CMD_REMINDER_CHECK_LOG {
+            get {
+                return ResourceManager.GetString("CMD_REMINDER_CHECK_LOG", resourceCulture);
             }
         }
         
@@ -286,6 +358,15 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to See output file at {0}.
+        /// </summary>
+        internal static string CMD_VIEW_OUTPUT_FILE {
+            get {
+                return ResourceManager.GetString("CMD_VIEW_OUTPUT_FILE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] comments {
@@ -306,7 +387,34 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}.  Please see log file for more information..
+        ///   Looks up a localized string similar to Output file not specified for custom rules pack command.
+        /// </summary>
+        internal static string PACK_MISSING_OUTPUT_ARG {
+            get {
+                return ResourceManager.GetString("PACK_MISSING_OUTPUT_ARG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pack default rules request from outside CLI call not supported.  Use custom rules option..
+        /// </summary>
+        internal static string PACK_RULES_NO_CLI_DEFAULT {
+            get {
+                return ResourceManager.GetString("PACK_RULES_NO_CLI_DEFAULT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate local default rules folder.  This command is intended to be run as part of the source code build operation only.  Use the custom rules option instead..
+        /// </summary>
+        internal static string PACK_RULES_NO_DEFAULT {
+            get {
+                return ResourceManager.GetString("PACK_RULES_NO_DEFAULT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Additional details may be found in log file at {0}.
         /// </summary>
         internal static string RUNTIME_ERROR_NAMED {
             get {
@@ -315,7 +423,7 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}.  Log file failed to create..
+        ///   Looks up a localized string similar to No additional information or log available.
         /// </summary>
         internal static string RUNTIME_ERROR_PRELOG {
             get {
@@ -324,7 +432,7 @@ namespace ApplicationInspector.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A runtime error has occured.  Please see log file for more information..
+        ///   Looks up a localized string similar to Additional details may be found in log file at {0}.
         /// </summary>
         internal static string RUNTIME_ERROR_UNNAMED {
             get {
@@ -452,14 +560,59 @@ namespace ApplicationInspector.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Rule parsing failed for file {0}.
         /// </summary>
-        internal static string VERIFY_RULE_FAILED {
+        internal static string VERIFY_RULE_LOADFILE_FAILED {
             get {
-                return ResourceManager.GetString("VERIFY_RULE_FAILED", resourceCulture);
+                return ResourceManager.GetString("VERIFY_RULE_LOADFILE_FAILED", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Verify rules failed.  See log file for details..
+        ///   Looks up a localized string similar to Rule {0} failed from dupicate rule id specified.
+        /// </summary>
+        internal static string VERIFY_RULES_DUPLICATEID_FAIL {
+            get {
+                return ResourceManager.GetString("VERIFY_RULES_DUPLICATEID_FAIL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rule {0} failed from unrecognized language specified.
+        /// </summary>
+        internal static string VERIFY_RULES_LANGUAGE_FAIL {
+            get {
+                return ResourceManager.GetString("VERIFY_RULES_LANGUAGE_FAIL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify default rules request from outside CLI call not supported.  Use custom rules option..
+        /// </summary>
+        internal static string VERIFY_RULES_NO_CLI_DEFAULT {
+            get {
+                return ResourceManager.GetString("VERIFY_RULES_NO_CLI_DEFAULT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rule {0} failed from missing rule id.
+        /// </summary>
+        internal static string VERIFY_RULES_NULLID_FAIL {
+            get {
+                return ResourceManager.GetString("VERIFY_RULES_NULLID_FAIL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rule {0} failed from invalid regex &apos;{1}&apos; with {2}.
+        /// </summary>
+        internal static string VERIFY_RULES_REGEX_FAIL {
+            get {
+                return ResourceManager.GetString("VERIFY_RULES_REGEX_FAIL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify rules failed.  See log file for details.
         /// </summary>
         internal static string VERIFY_RULES_RESULTS_FAIL {
             get {

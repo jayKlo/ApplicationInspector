@@ -1,115 +1,194 @@
 ﻿// Copyright (C) Microsoft. All rights reserved.
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
+using Microsoft.ApplicationInspector.RulesEngine;
+using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using RulesEngine;
+using System.Linq;
 
-
-namespace Microsoft.AppInspector
+namespace Microsoft.ApplicationInspector.Commands
 {
-    public class ExportTagsCommand : ICommand
-   {
+    /// <summary>
+    ///
+    /// </summary>
+    public class ExportTagsOptions : CommandOptions
+    {
+        public string? CustomRulesPath { get; set; }
+        public bool IgnoreDefaultRules { get; set; }
+    }
+
+    /// <summary>
+    /// Final result of GetResult call
+    /// </summary>
+    public class ExportTagsResult : Result
+    {
         public enum ExitCode
         {
             Success = 0,
             Error = 1,
-            CriticalError = 2
+            CriticalError = Utils.ExitCode.CriticalError //ensure common value for final exit log mention
         }
 
-        private string _arg_outputFile;
-        private string _arg_customRulesPath;
-        private bool _arg_ignoreDefaultRules;
+        [JsonProperty(Order = 2, PropertyName = "resultCode")]
+        public ExitCode ResultCode { get; set; }
+
+        /// <summary>
+        /// List of tags exported from specified ruleset
+        /// </summary>
+        [JsonProperty(Order = 3, PropertyName = "tagsList")]
+        public List<string> TagsList { get; set; }
+
+        public ExportTagsResult()
+        {
+            TagsList = new List<string>();
+        }
+    }
+
+    /// <summary>
+    /// Export command operation manages setp and delivery of ExportResult objects
+    /// </summary>
+    public class ExportTagsCommand
+    {
+        private readonly ExportTagsOptions _options;
         private RuleSet _rules;
-        private WriteOnce.ConsoleVerbosity _arg_consoleVerbosityLevel;
 
-        public ExportTagsCommand(ExportTagsCommandOptions opt)
+        public ExportTagsCommand(ExportTagsOptions opt)
         {
-            _rules = new RuleSet(WriteOnce.Log);
-            _arg_customRulesPath = opt.CustomRulesPath;
-            _arg_outputFile = opt.OutputFilePath;
-            _arg_ignoreDefaultRules = opt.IgnoreDefaultRules;
-            if (!Enum.TryParse(opt.ConsoleVerbosityLevel, true, out _arg_consoleVerbosityLevel))
-                throw new OpException(String.Format(ErrMsg.FormatString(ErrMsg.ID.CMD_INVALID_ARG_VALUE, "-x")));
-            WriteOnce.Verbosity = _arg_consoleVerbosityLevel;
-            ConfigureOutput();
-            ConfigRules();
-        }
+            _options = opt;
 
-
-        private void ConfigureOutput()
-        {
-            //setup output                       
-            TextWriter outputWriter;
-
-            if (!string.IsNullOrEmpty(_arg_outputFile))
+            try
             {
-                outputWriter = File.CreateText(_arg_outputFile);
-                outputWriter.WriteLine(Program.GetVersionString());
-                WriteOnce.Writer = outputWriter;
-                WriteOnce.Verbosity = WriteOnce.ConsoleVerbosity.Low;
+                _options.Log ??= Utils.SetupLogging(_options);
+                WriteOnce.Log ??= _options.Log;
+                _rules = new RuleSet(_options.Log);
+
+                ConfigureConsoleOutput();
+                ConfigRules();
+            }
+            catch (Exception e)
+            {
+                WriteOnce.Error(e.Message);
+                throw new OpException(e.Message);
             }
         }
 
+        #region ConfigMethods
 
-        void ConfigRules()
+        /// <summary>
+        /// Establish console verbosity
+        /// For NuGet DLL use, console is muted overriding any arguments sent
+        /// </summary>
+        private void ConfigureConsoleOutput()
         {
-            List<string> rulePaths = new List<string>();
-            if (!_arg_ignoreDefaultRules)
-                rulePaths.Add(Utils.GetPath(Utils.AppPath.defaultRules));
+            WriteOnce.SafeLog("ExportTagsCommand::ConfigureConsoleOutput", LogLevel.Trace);
 
-            if (!string.IsNullOrEmpty(_arg_customRulesPath))
-                rulePaths.Add(_arg_customRulesPath);
-
-            foreach (string rulePath in rulePaths)
+            //Set console verbosity based on run context (none for DLL use) and caller arguments
+            if (!Utils.CLIExecutionContext)
             {
-                if (Directory.Exists(rulePath))
-                    _rules.AddDirectory(rulePath);
-                else if (File.Exists(rulePath))
-                    _rules.AddFile(rulePath);
+                WriteOnce.Verbosity = WriteOnce.ConsoleVerbosity.None;
+            }
+            else
+            {
+                WriteOnce.ConsoleVerbosity verbosity = WriteOnce.ConsoleVerbosity.Medium;
+                if (!Enum.TryParse(_options.ConsoleVerbosityLevel, true, out verbosity))
+                {
+                    throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_INVALID_ARG_VALUE, "-x"));
+                }
                 else
                 {
-                    throw new OpException(ErrMsg.FormatString(ErrMsg.ID.CMD_INVALID_RULE_PATH, rulePath));
+                    WriteOnce.Verbosity = verbosity;
+                }
+            }
+        }
+
+        private void ConfigRules()
+        {
+            WriteOnce.SafeLog("ExportTagsCommand::ConfigRules", LogLevel.Trace);
+
+            if (!_options.IgnoreDefaultRules)
+            {
+                _rules = Utils.GetDefaultRuleSet(_options?.Log);
+            }
+
+            if (!string.IsNullOrEmpty(_options?.CustomRulesPath))
+            {
+                if (_rules == null)
+                {
+                    _rules = new RuleSet(_options.Log);
+                }
+
+                if (Directory.Exists(_options.CustomRulesPath))
+                {
+                    _rules.AddDirectory(_options.CustomRulesPath);
+                }
+                else if (File.Exists(_options.CustomRulesPath))
+                {
+                    _rules.AddFile(_options.CustomRulesPath);
+                }
+                else
+                {
+                    throw new OpException(MsgHelp.FormatString(MsgHelp.ID.CMD_INVALID_RULE_PATH, _options.CustomRulesPath));
                 }
             }
 
             //error check based on ruleset not path enumeration
-            if (_rules.Count() == 0)
+            if (_rules == null || !_rules.Any())
             {
-                throw new OpException(ErrMsg.GetString(ErrMsg.ID.CMD_NORULES_SPECIFIED));
+                throw new OpException(MsgHelp.GetString(MsgHelp.ID.CMD_NORULES_SPECIFIED));
             }
         }
 
-        public int Run()
+        #endregion ConfigMethods
+
+        public ExportTagsResult GetResult()
         {
-            WriteOnce.Operation(ErrMsg.FormatString(ErrMsg.ID.CMD_RUNNING, "Exporttags"));
+            WriteOnce.SafeLog("ExportTagsCommand::Run", LogLevel.Trace);
+            WriteOnce.Operation(MsgHelp.FormatString(MsgHelp.ID.CMD_RUNNING, "Export Tags"));
+
+            ExportTagsResult exportTagsResult = new ExportTagsResult()
+            {
+                AppVersion = Utils.GetVersionString()
+            };
 
             SortedDictionary<string, string> uniqueTags = new SortedDictionary<string, string>();
 
-            foreach (Rule r in _rules)
+            try
             {
-                //builds a list of unique tags
-                foreach (string t in r.Tags)
+                foreach (Rule? r in _rules)
                 {
-                    if (uniqueTags.ContainsKey(t))
-                        continue;
-                    else
-                        uniqueTags.Add(t, t);
+                    //builds a list of unique tags
+                    foreach (string t in r?.Tags ?? new string[] { })
+                    {
+                        if (uniqueTags.ContainsKey(t))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            uniqueTags.Add(t, t);
+                        }
+                    }
                 }
+
+                //generate results list
+                foreach (string s in uniqueTags.Values)
+                {
+                    exportTagsResult.TagsList.Add(s);
+                }
+
+                exportTagsResult.ResultCode = ExportTagsResult.ExitCode.Success;
+            }
+            catch (OpException e)
+            {
+                WriteOnce.Error(e.Message);
+                //caught for CLI callers with final exit msg about checking log or throws for DLL callers
+                throw;
             }
 
-             //separate loop so results are sorted (Sorted type)
-            foreach (string s in uniqueTags.Values)
-                WriteOnce.Result(s, true);
-
-            WriteOnce.Operation(ErrMsg.FormatString(ErrMsg.ID.CMD_COMPLETED, "Exporttags"));
-            WriteOnce.FlushAll();
-            if (!String.IsNullOrEmpty(_arg_outputFile))
-                WriteOnce.Any(ErrMsg.FormatString(ErrMsg.ID.ANALYZE_OUTPUT_FILE, _arg_outputFile),true, ConsoleColor.Gray,WriteOnce.ConsoleVerbosity.Low);
-
-
-            return (int)ExitCode.Success;
+            return exportTagsResult;
         }
     }
 }

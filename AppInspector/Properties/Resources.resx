@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ANALYZE_COMPRESSED_ERROR" xml:space="preserve">
-    <value>Problem while decompressing {0}: Unzip and try running on uncompressed files.</value>
+    <value>Problem while decompressing {0}: Unzip and try running on uncompressed files</value>
   </data>
   <data name="ANALYZE_COMPRESSED_FILESIZE_WARN" xml:space="preserve">
     <value>Decompressing may take longer for larger files</value>
@@ -129,11 +129,26 @@
   <data name="ANALYZE_COMPRESSED_PROCESSING" xml:space="preserve">
     <value>Decompressing files...</value>
   </data>
+  <data name="ANALYZE_EXCLUDED_TYPE_SKIPPED" xml:space="preserve">
+    <value>File skipped: Name or path in exclude list. {0}</value>
+  </data>
   <data name="ANALYZE_FILESIZE_SKIPPED" xml:space="preserve">
-    <value>File {0} is too large.  File skipped.</value>
+    <value>File skipped: File size is too large.  {0}</value>
   </data>
   <data name="ANALYZE_FILES_PROCESSED_PCNT" xml:space="preserve">
     <value>{0}% source files processed</value>
+  </data>
+  <data name="ANALYZE_FILE_TYPE_OPEN" xml:space="preserve">
+    <value>Unable to determine file type.  File open error for {0}</value>
+  </data>
+  <data name="ANALYZE_HTML_EXTENSION" xml:space="preserve">
+    <value>The output file does not have an html or htm extension and may not open properly in your browser</value>
+  </data>
+  <data name="ANALYZE_LANGUAGE_NOTFOUND" xml:space="preserve">
+    <value>File skipped: Language not found for file {0}</value>
+  </data>
+  <data name="ANALYZE_NODUPLICATES_HTML_FORMAT" xml:space="preserve">
+    <value>Allow duplicate matches argument not supported for html output format.  Select a different output format (text/json) or remove the argument.</value>
   </data>
   <data name="ANALYZE_NOPATTERNS" xml:space="preserve">
     <value>No pattern matches were detected for files in source path</value>
@@ -141,11 +156,11 @@
   <data name="ANALYZE_NOSUPPORTED_FILETYPES" xml:space="preserve">
     <value>No file types found in source path that are supported</value>
   </data>
-  <data name="ANALYZE_OUTPUT_FILE" xml:space="preserve">
-    <value>See output file {0}</value>
-  </data>
   <data name="ANALYZE_REPORTSIZE_WARN" xml:space="preserve">
     <value>The output.html file size is large and may render slowly.  Consider running using alternate output format options as needed.</value>
+  </data>
+  <data name="ANALYZE_SIMPLETAGS_HTML_FORMAT" xml:space="preserve">
+    <value>Simple tags only argument not supported for html output format.  Select a different output format or remove the argument</value>
   </data>
   <data name="ANALYZE_UNCOMPRESSED_FILETYPE" xml:space="preserve">
     <value>uncompressed</value>
@@ -157,7 +172,7 @@
     <value>Unable to launch output.html automatically.  Set the BROWSER environment variable to your desired browser and try again or launch your browser and navigate to the file to view the report file manually.</value>
   </data>
   <data name="BROWSER_START_FAIL" xml:space="preserve">
-    <value>Unable to launch output.html in default browser.  Launch your browser manually to view output.html report file.</value>
+    <value>Unable to launch output.html in default browser.  Launch your browser manually to view output.html report file</value>
   </data>
   <data name="BROWSER_START_SUCCESS" xml:space="preserve">
     <value>Opening default browser to output.html report</value>
@@ -174,14 +189,23 @@
   <data name="CMD_INVALID_FILE_OR_DIR" xml:space="preserve">
     <value>Invalid file or directory {0}</value>
   </data>
+  <data name="CMD_INVALID_LOG_PATH" xml:space="preserve">
+    <value>The requested log file {0}) exist but is not recognized as an application log. Provide a different value or delete the file and try again.</value>
+  </data>
   <data name="CMD_INVALID_RULE_PATH" xml:space="preserve">
     <value>Invalid rule path {0}</value>
   </data>
   <data name="CMD_NORULES_SPECIFIED" xml:space="preserve">
-    <value>No rules specified.  At least one valid rules path required.</value>
+    <value>No rules specified.  At least one valid rules path required</value>
+  </data>
+  <data name="CMD_NO_OUTPUT" xml:space="preserve">
+    <value>No output specified.  Raise the console versosity or provide an output file argument.</value>
   </data>
   <data name="CMD_PREPARING_REPORT" xml:space="preserve">
     <value>Preparing report</value>
+  </data>
+  <data name="CMD_REMINDER_CHECK_LOG" xml:space="preserve">
+    <value>Additional details may be found in log file at {0}</value>
   </data>
   <data name="CMD_REPORT_DONE" xml:space="preserve">
     <value>{0} report completed</value>
@@ -192,6 +216,9 @@
   <data name="CMD_RUNNING" xml:space="preserve">
     <value>{0} command running</value>
   </data>
+  <data name="CMD_VIEW_OUTPUT_FILE" xml:space="preserve">
+    <value>See output file at {0}</value>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="comments" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\RulesEngine\Resources\comments.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -199,14 +226,23 @@
   <data name="languages" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\..\RulesEngine\Resources\languages.json;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="PACK_MISSING_OUTPUT_ARG" xml:space="preserve">
+    <value>Output file not specified for custom rules pack command</value>
+  </data>
+  <data name="PACK_RULES_NO_CLI_DEFAULT" xml:space="preserve">
+    <value>Pack default rules request from outside CLI call not supported.  Use custom rules option.</value>
+  </data>
+  <data name="PACK_RULES_NO_DEFAULT" xml:space="preserve">
+    <value>Unable to locate local default rules folder.  This command is intended to be run as part of the source code build operation only.  Use the custom rules option instead.</value>
+  </data>
   <data name="RUNTIME_ERROR_NAMED" xml:space="preserve">
-    <value>{0}.  Please see log file for more information.</value>
+    <value>Additional details may be found in log file at {0}</value>
   </data>
   <data name="RUNTIME_ERROR_PRELOG" xml:space="preserve">
-    <value>{0}.  Log file failed to create.</value>
+    <value>No additional information or log available</value>
   </data>
   <data name="RUNTIME_ERROR_UNNAMED" xml:space="preserve">
-    <value>A runtime error has occured.  Please see log file for more information.</value>
+    <value>Additional details may be found in log file at {0}</value>
   </data>
   <data name="TAGDIFF_NO_TAGS_FOUND" xml:space="preserve">
     <value>No tags found in one or both source paths</value>
@@ -247,13 +283,28 @@
   <data name="TAGTEST_RESULTS_TEST_TYPE" xml:space="preserve">
     <value>Tagtest for [{0}]: </value>
   </data>
+  <data name="VERIFY_RULES_DUPLICATEID_FAIL" xml:space="preserve">
+    <value>Rule {0} failed from dupicate rule id specified</value>
+  </data>
+  <data name="VERIFY_RULES_LANGUAGE_FAIL" xml:space="preserve">
+    <value>Rule {0} failed from unrecognized language specified</value>
+  </data>
+  <data name="VERIFY_RULES_NO_CLI_DEFAULT" xml:space="preserve">
+    <value>Verify default rules request from outside CLI call not supported.  Use custom rules option.</value>
+  </data>
+  <data name="VERIFY_RULES_NULLID_FAIL" xml:space="preserve">
+    <value>Rule {0} failed from missing rule id</value>
+  </data>
+  <data name="VERIFY_RULES_REGEX_FAIL" xml:space="preserve">
+    <value>Rule {0} failed from invalid regex '{1}' with {2}</value>
+  </data>
   <data name="VERIFY_RULES_RESULTS_FAIL" xml:space="preserve">
-    <value>Verify rules failed.  See log file for details.</value>
+    <value>Verify rules failed.  See log file for details</value>
   </data>
   <data name="VERIFY_RULES_RESULTS_SUCCESS" xml:space="preserve">
     <value>Verify rules succeeded</value>
   </data>
-  <data name="VERIFY_RULE_FAILED" xml:space="preserve">
+  <data name="VERIFY_RULE_LOADFILE_FAILED" xml:space="preserve">
     <value>Rule parsing failed for file {0}</value>
   </data>
 </root>
